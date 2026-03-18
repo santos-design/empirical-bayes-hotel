@@ -55,11 +55,11 @@ Insight: O City Hotel tem problemas mais graves do que a média bruta sugere, es
 
 ## 📊 Visualizações
 
-![Shrinkage Plot](grafico_shrinkage.png)
+![Shrinkage Plot](figs/grafico_shrinkage.png)
 
 *Figura 1: Taxa Bruta vs Estimativa Bayesiana. Quanto menor o ponto (poucas reservas), maior o movimento em direção à média global.*
 
-![Distribuição](mudanca_distribuicao.png)
+![Distribuição](figs/mudanca_distribuicao.png)
 
 *Figura 2: Distribuição antes e depois do shrinkage. Os extremos (0% e 100%) são eliminados.*
 
