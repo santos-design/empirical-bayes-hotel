@@ -1,65 +1,76 @@
-# Empirical Bayes Shrinkage para Análise de Cancelamentos Hoteleiros
+# 🏨 Empirical Bayes Shrinkage para Análise de Cancelamentos Hoteleiros
 
-## 📋 Sobre o Projeto
+## 📌 Visão Geral
 
-Este repositório implementa **estimação Bayesiana empírica** para resolver um problema comum em análise de dados: como estimar taxas de cancelamento de forma confiável quando se tem segmentos com poucas reservas.
+Este projeto resolve um problema real e recorrente em análise de dados: a estimação de taxas com amostras pequenas. Utilizando estimação Bayesiana empírica, demonstro como métricas brutas (ex: taxas de cancelamento) podem ser enganosas quando baseadas em poucas observações e como o método de shrinkage produz resultados mais confiáveis.
 
-Utilizando dados públicos de reservas hoteleiras do Kaggle, o projeto demonstra como taxas brutas podem ser enganosas e como o método de **shrinkage** (contração) produz estimativas mais realistas.
+Dataset: Hotel Booking Demand (Kaggle)
+Técnica principal: Empirical Bayes com prior Beta
+Objetivo: Identificar verdadeiros problemas de cancelamento sem ruído estatístico
 
-### O Problema
+## 🎯 O Problema de Negócio
+
+Imagine gerenciar uma rede de hotéis e se deparar com este relatório:
 
 | Segmento | Reservas | Cancelamentos | Taxa Bruta | Problema |
 |----------|----------|---------------|------------|----------|
-| City Hotel + País X | 2 | 2 | 100% | Amostra pequena, não confiável |
-| City Hotel + Portugal | 48.590 | 20.552 | 42.3% | Estimativa confiável |
+| City Hotel + Andorra | 2 | 2 | 100% | Amostra pequena (não confiável) |
+| City Hotel + Portugal | 48.590 | 20.552 | 42,3% | Amostra grande (confiável) |
 
-### A Solução
+A intuição diria: "Feche a operação em Andorra imediatamente!" Mas essa decisão seria baseada em ruído, não em realidade.
 
-estimativa_bayesiana = (cancelamentos + 3.45) / (reservas + 13.14)
+## 🧠 A Solução Bayesiana
 
-## 📊 Resultados Principais
+### O Prior (aprendido dos dados)
+Antes de analisar cada hotel, o método aprende uma distribuição global:
 
-### Prior Estimado
+α₀ = 3.45 (cancelamentos "fictícios")
+β₀ = 9.69 (não-cancelamentos "fictícios")
+Média global = 26.3%
+Peso do prior = 13.14 reservas
 
-α₀ = 3.45 (cancelamentos fictícios)
-β₀ = 9.69 (não-cancelamentos fictícios)
-Média do prior = 26.3%
-Tamanho efetivo = 13.14 reservas
+### A Fórmula do Shrinkage
 
-### Segmentos Mais Voláteis
+estimativa_bayesiana = (cancelamentos_reais + 3.45) / (reservas_reais + 13.14)
+
+## 📈 Resultados
+
+### Efeito do Shrinkage
 
 | Hotel | País | Reservas | Taxa Bruta | Est. Bayesiana | Shrinkage |
 |-------|------|----------|------------|----------------|-----------|
-| City Hotel | HND | 1 | 100% | 31.5% | 68.5% |
-| City Hotel | BEN | 3 | 100% | 40.0% | 60.0% |
-| City Hotel | MAC | 15 | 100% | 65.6% | 34.4% |
+| City Hotel | Honduras | 1 | 100% | 31.5% | 68.5% |
+| City Hotel | Benin | 3 | 100% | 40.0% | 60.0% |
+| City Hotel | Macau | 15 | 100% | 65.6% | 34.4% |
+| City Hotel | Portugal | 48.590 | 42.3% | 42.3% | 0.0% |
 
 ### Comparação entre Hotéis
 
-| Hotel | Segmentos | Reservas | Taxa Bruta | Taxa Bayesiana |
-|-------|-----------|----------|------------|----------------|
-| City Hotel | 167 | 79.330 | 41.7% | 51.5% |
-| Resort Hotel | 126 | 40.060 | 27.8% | 29.8% |
+| Hotel | Segmentos | Reservas | Taxa Bruta | Taxa Bayesiana | Diferença |
+|-------|-----------|----------|------------|----------------|-----------|
+| City Hotel | 167 | 79.330 | 41.7% | 51.5% | +9.8% |
+| Resort Hotel | 126 | 40.060 | 27.8% | 29.8% | +2.0% |
 
-### Visualizações
+Insight: O City Hotel tem problemas mais graves do que a média bruta sugere, especialmente em mercados pequenos.
 
-![Shrinkage Plot](figs/grafico_shrinkage.png)
+## 📊 Visualizações
 
-*Gráfico: Taxa Bruta vs Estimativa Bayesiana*
+![Shrinkage Plot](grafico_shrinkage.png)
 
-![Distribuição](figs/mudanca_distribuicao.png)
+*Figura 1: Taxa Bruta vs Estimativa Bayesiana. Quanto menor o ponto (poucas reservas), maior o movimento em direção à média global.*
 
-*Distribuição antes e depois do shrinkage*
+![Distribuição](mudanca_distribuicao.png)
 
-## 🚀 Como Executar
+*Figura 2: Distribuição antes e depois do shrinkage. Os extremos (0% e 100%) são eliminados.*
+
+## 🚀 Como Reproduzir
 
 ### Pré-requisitos
-
 R >= 4.0.0
-RStudio
+RStudio (recomendado)
 Git
 
-### Passo a Passo
+### Execução
 
 git clone https://github.com/santos-design/empirical-bayes-hotel.git
 
@@ -67,21 +78,20 @@ install.packages(c("tidyverse", "MASS", "VGAM", "gridExtra", "knitr", "bbmle"))
 
 source("scripts/analyse_hotel.R")
 
-Dados: Faça o download do dataset Hotel Booking Demand do Kaggle e coloque o arquivo hotel_bookings.csv na pasta data/.
+Dados: Baixe o dataset do Kaggle e coloque hotel_bookings.csv na pasta data/.
 
-## 📁 Estrutura do Projeto
+## 📁 Estrutura
 
 empirical-bayes-hotel/
-├── scripts/
-├── data/
-├── outputs/
-├── figs/
-└── README.md
+├── scripts/          # Código fonte
+├── data/             # Dados brutos (não versionados)
+├── outputs/          # Resultados processados (.csv)
+├── figs/             # Visualizações (.png)
+└── README.md         # Documentação
 
-## 👤 Autor
+## 👨‍💻 Autor
 
 **Ivan Santos**
 
 LinkedIn: https://www.linkedin.com/in/ivan-santos-8046a8355/
-
 GitHub: https://github.com/santos-design
